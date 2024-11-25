@@ -141,10 +141,11 @@ INTERFACE /ubc/2ui5_if_core_types
       o_app_call  TYPE REF TO /ubc/2ui5_if_app,
       o_app_leave TYPE REF TO /ubc/2ui5_if_app,
       s_set       TYPE ty_s_next_frontend,
+      r_data      TYPE REF TO data,
     END OF ty_s_next.
 
   TYPES:
-    BEGIN OF ty_s_http_response_post,
+    BEGIN OF ty_s_response,
       BEGIN OF s_front,
         params    TYPE ty_s_next_frontend,
         id        TYPE string,
@@ -152,10 +153,10 @@ INTERFACE /ubc/2ui5_if_core_types
         app       TYPE string,
       END OF s_front,
       model TYPE string,
-    END OF ty_s_http_response_post.
+    END OF ty_s_response.
 
   TYPES:
-    BEGIN OF ty_s_http_request_post,
+    BEGIN OF ty_s_request,
       o_model TYPE REF TO /ubc/2ui5_if_ajson,
       BEGIN OF s_front,
         id          TYPE string,
@@ -172,7 +173,7 @@ INTERFACE /ubc/2ui5_if_core_types
         check_launchpad TYPE abap_bool,
         app_start       TYPE string,
       END OF s_control,
-    END OF ty_s_http_request_post.
+    END OF ty_s_request.
 
   TYPES:
     BEGIN OF ty_s_draft,
@@ -199,6 +200,7 @@ INTERFACE /ubc/2ui5_if_core_types
       view               TYPE string,
       s_draft            TYPE ty_s_draft,
       s_config           TYPE ty_s_config,
+      r_data             TYPE REF TO data,
     END OF ty_s_actual.
 
   TYPES ty_s_db TYPE /ubc/2ui5_t_01.

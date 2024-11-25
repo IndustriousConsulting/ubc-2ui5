@@ -1,21 +1,20 @@
-CLASS /ubc/2ui5_cl_hello_world DEFINITION
+CLASS /ubc/2ui5_cl_app_hello_world DEFINITION
   PUBLIC
-  CREATE PUBLIC .
+  CREATE PUBLIC.
 
   PUBLIC SECTION.
-
     INTERFACES /ubc/2ui5_if_app.
-    DATA name TYPE string.
+
+    DATA name              TYPE string.
     DATA check_initialized TYPE abap_bool.
 
   PROTECTED SECTION.
+
   PRIVATE SECTION.
 ENDCLASS.
 
 
-
-CLASS /ubc/2ui5_cl_hello_world IMPLEMENTATION.
-
+CLASS /ubc/2ui5_cl_app_hello_world IMPLEMENTATION.
 
   METHOD /ubc/2ui5_if_app~main.
 
@@ -30,7 +29,8 @@ CLASS /ubc/2ui5_cl_hello_world IMPLEMENTATION.
                 )->title( 'Make an input here and send it to the server...'
                 )->label( 'Name'
                 )->input( client->_bind_edit( name )
-                )->button( text  = 'post' press = client->_event( 'BUTTON_POST' )
+                )->button( text  = 'post'
+                           press = client->_event( 'BUTTON_POST' )
         )->stringify( ) ).
 
     ENDIF.
