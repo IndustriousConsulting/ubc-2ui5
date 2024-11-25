@@ -3,7 +3,7 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>/UBC/2UI5_CL_CORE_UTIL_SRV</CLSNAME>
+    <CLSNAME>/UBC/2UI5_CL_CORE_SRV_UTIL</CLSNAME>
     <LANGU>E</LANGU>
     <DESCRIPT>abap2UI5 - utility functions</DESCRIPT>
     <STATE>1</STATE>

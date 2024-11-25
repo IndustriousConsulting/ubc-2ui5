@@ -1,45 +1,42 @@
-CLASS /ubc/2ui5_cl_core_json_srv DEFINITION
-  PUBLIC
-  FINAL
-  CREATE PUBLIC .
+CLASS /ubc/2ui5_cl_core_srv_json DEFINITION
+  PUBLIC FINAL
+  CREATE PUBLIC.
 
   PUBLIC SECTION.
 
-    INTERFACES /ubc/2ui5_if_ajson_filter .
+    INTERFACES /ubc/2ui5_if_ajson_filter.
 
     METHODS request_json_to_abap
       IMPORTING
         val           TYPE string
       RETURNING
-        VALUE(result) TYPE /ubc/2ui5_if_core_types=>ty_s_http_request_post .
+        VALUE(result) TYPE /ubc/2ui5_if_core_types=>ty_s_request.
 
     METHODS response_abap_to_json
       IMPORTING
-        val           TYPE /ubc/2ui5_if_core_types=>ty_s_http_response_post
+        val           TYPE /ubc/2ui5_if_core_types=>ty_s_response
       RETURNING
-        VALUE(result) TYPE string .
+        VALUE(result) TYPE string.
 
     METHODS model_front_to_back
       IMPORTING
         view    TYPE string
         t_attri TYPE REF TO /ubc/2ui5_if_core_types=>ty_t_attri
-        model   TYPE REF TO /ubc/2ui5_if_ajson .
+        model   TYPE REF TO /ubc/2ui5_if_ajson.
 
     METHODS model_back_to_front
       IMPORTING
         t_attri       TYPE REF TO /ubc/2ui5_if_core_types=>ty_t_attri
       RETURNING
-        VALUE(result) TYPE string .
+        VALUE(result) TYPE string.
 
   PROTECTED SECTION.
+
   PRIVATE SECTION.
 ENDCLASS.
 
 
-
-CLASS /ubc/2ui5_cl_core_json_srv IMPLEMENTATION.
-
-
+CLASS /ubc/2ui5_cl_core_srv_json IMPLEMENTATION.
   METHOD model_front_to_back.
 
     IF line_exists( t_attri->*[ view = view ] ).
@@ -49,8 +46,8 @@ CLASS /ubc/2ui5_cl_core_json_srv IMPLEMENTATION.
     ENDIF.
 
     LOOP AT t_attri->* REFERENCE INTO DATA(lr_attri)
-      WHERE bind_type = /ubc/2ui5_if_core_types=>cs_bind_type-two_way
-      AND view  = lv_view.
+         WHERE     bind_type = /ubc/2ui5_if_core_types=>cs_bind_type-two_way
+               AND view      = lv_view.
       TRY.
 
           DATA(lo_val_front) = model->slice( lr_attri->name_client ).
@@ -71,18 +68,14 @@ CLASS /ubc/2ui5_cl_core_json_srv IMPLEMENTATION.
             CONTINUE.
           ENDIF.
 
-          lo_val_front->to_abap(
-            IMPORTING
-              ev_container = <val> ).
+          lo_val_front->to_abap( IMPORTING ev_container = <val> ).
 
         CATCH cx_root INTO DATA(x).
           /ubc/2ui5_cl_util=>x_raise( |JSON_PARSING_ERROR: { x->get_text( ) } | ).
       ENDTRY.
     ENDLOOP.
 
-
   ENDMETHOD.
-
 
   METHOD model_back_to_front.
     TRY.
@@ -91,9 +84,11 @@ CLASS /ubc/2ui5_cl_core_json_srv IMPLEMENTATION.
         LOOP AT t_attri->* REFERENCE INTO DATA(lr_attri) WHERE bind_type <> ``.
 
           IF lr_attri->custom_mapper IS BOUND.
-            DATA(ajson) = CAST /ubc/2ui5_if_ajson( /ubc/2ui5_cl_ajson=>create_empty( ii_custom_mapping = lr_attri->custom_mapper ) ).
+            DATA(ajson) = CAST /ubc/2ui5_if_ajson( /ubc/2ui5_cl_ajson=>create_empty(
+                                                   ii_custom_mapping = lr_attri->custom_mapper ) ).
           ELSE.
-            ajson = CAST /ubc/2ui5_if_ajson( /ubc/2ui5_cl_ajson=>create_empty( ii_custom_mapping = /ubc/2ui5_cl_ajson_mapping=>create_upper_case( ) ) ).
+            ajson = CAST /ubc/2ui5_if_ajson( /ubc/2ui5_cl_ajson=>create_empty(
+                                             ii_custom_mapping = /ubc/2ui5_cl_ajson_mapping=>create_upper_case( ) ) ).
           ENDIF.
 
           CASE lr_attri->bind_type.
@@ -105,10 +100,14 @@ CLASS /ubc/2ui5_cl_core_json_srv IMPLEMENTATION.
                 CONTINUE.
               ENDIF.
 *              ASSERT sy-subrc = 0.
-              ajson->set( iv_ignore_empty = abap_false iv_path = `/` iv_val = <attribute> ).
+              ajson->set( iv_ignore_empty = abap_false
+                          iv_path         = `/`
+                          iv_val          = <attribute> ).
 
             WHEN /ubc/2ui5_if_core_types=>cs_bind_type-one_time.
-              ajson->set( iv_ignore_empty = abap_false iv_path = `/` iv_val = lr_attri->json_bind_local ).
+              ajson->set( iv_ignore_empty = abap_false
+                          iv_path         = `/`
+                          iv_val          = lr_attri->json_bind_local ).
 
             WHEN OTHERS.
               ASSERT `` = `ERROR_UNKNOWN_BIND_MODE`.
@@ -118,7 +117,8 @@ CLASS /ubc/2ui5_cl_core_json_srv IMPLEMENTATION.
             ajson = ajson->filter( lr_attri->custom_filter ).
           ENDIF.
 
-          ajson_result->set( iv_path = lr_attri->name_client iv_val = ajson ).
+          ajson_result->set( iv_path = lr_attri->name_client
+                             iv_val  = ajson ).
         ENDLOOP.
 
         result = ajson_result->stringify( ).
@@ -129,31 +129,28 @@ CLASS /ubc/2ui5_cl_core_json_srv IMPLEMENTATION.
     ENDTRY.
   ENDMETHOD.
 
-
   METHOD request_json_to_abap.
     TRY.
 
         DATA(lo_ajson) = CAST /ubc/2ui5_if_ajson( /ubc/2ui5_cl_ajson=>parse( val ) ).
 
-        DATA(lv_model_edit_name) = `/` && /ubc/2ui5_if_core_types=>cs_ui5-two_way_model.
+        DATA(lv_model_edit_name) = |/{ /ubc/2ui5_if_core_types=>cs_ui5-two_way_model }|.
 
         result-o_model = /ubc/2ui5_cl_ajson=>create_empty( ).
         DATA(lo_model) = lo_ajson->slice( lv_model_edit_name ).
-        result-o_model->set( iv_path = lv_model_edit_name iv_val = lo_model ).
+        result-o_model->set( iv_path = lv_model_edit_name
+                             iv_val  = lo_model ).
         lo_ajson->delete( lv_model_edit_name ).
 
         lo_ajson = lo_ajson->slice( `/S_FRONT` ).
-        lo_ajson->to_abap(
-            EXPORTING
-               iv_corresponding = abap_true
-            IMPORTING
-                ev_container    = result-s_front ).
+        lo_ajson->to_abap( EXPORTING iv_corresponding = abap_true
+                           IMPORTING ev_container     = result-s_front ).
 
         result-s_front-o_comp_data = lo_ajson->slice( `/CONFIG/ComponentData` ).
 
-        result-s_control-check_launchpad = xsdbool( result-s_front-search CS `scenario=LAUNCHPAD`
-             OR result-s_front-pathname CS `/ui2/flp`
-             OR result-s_front-pathname CS `test/flpSandbox`
+        result-s_control-check_launchpad = xsdbool(    result-s_front-search   CS `scenario=LAUNCHPAD`
+                                                    OR result-s_front-pathname CS `/ui2/flp`
+                                                    OR result-s_front-pathname CS `test/flpSandbox`
              ).
         IF result-s_front-id IS NOT INITIAL.
           RETURN.
@@ -175,36 +172,35 @@ CLASS /ubc/2ui5_cl_core_json_srv IMPLEMENTATION.
         ENDIF.
 
         result-s_control-app_start = /ubc/2ui5_cl_util=>c_trim_upper(
-        /ubc/2ui5_cl_util=>url_param_get( val = `app_start` url = result-s_front-search ) ).
+                                         /ubc/2ui5_cl_util=>url_param_get( val = `app_start`
+                                                                       url = result-s_front-search ) ).
 
       CATCH cx_root INTO DATA(x).
         RAISE EXCEPTION TYPE /ubc/2ui5_cx_util_error
-          EXPORTING
-            val = x.
+          EXPORTING val = x.
     ENDTRY.
   ENDMETHOD.
-
 
   METHOD response_abap_to_json.
     TRY.
 
         DATA(ajson_result) = CAST /ubc/2ui5_if_ajson( /ubc/2ui5_cl_ajson=>create_empty(
-          ii_custom_mapping = /ubc/2ui5_cl_ajson_mapping=>create_upper_case( ) ) ).
+                                                      ii_custom_mapping = /ubc/2ui5_cl_ajson_mapping=>create_upper_case( ) ) ).
 
-        ajson_result->set( iv_path = `/` iv_val = val-s_front ).
-        ajson_result = ajson_result->filter( NEW /ubc/2ui5_cl_core_json_srv( ) ).
+        ajson_result->set( iv_path = `/`
+                           iv_val  = val-s_front ).
+        ajson_result = ajson_result->filter( NEW /ubc/2ui5_cl_core_srv_json( ) ).
         DATA(lv_frontend) = ajson_result->stringify( ).
 
-        result = `{` &&
+        result = |\{| &&
             |"S_FRONT":{ lv_frontend },| &&
             |"MODEL":{ val-model }| &&
-          `}`.
+          |\}|.
 
       CATCH cx_root INTO DATA(x).
         ASSERT x IS NOT BOUND.
     ENDTRY.
   ENDMETHOD.
-
 
   METHOD /ubc/2ui5_if_ajson_filter~keep_node.
 
