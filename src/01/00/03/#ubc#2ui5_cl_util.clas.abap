@@ -1232,7 +1232,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     check_raise_srtti_installed( ).
 
     DATA srtti TYPE REF TO object.
-    DATA(lv_classname) = 'ZCL_SRTTI_TYPEDESCR'.
+    DATA(lv_classname) = '/UBC/CL_SRTTI_TYPEDESCR'.
     CALL METHOD (lv_classname)=>('CREATE_BY_DATA_OBJECT')
       EXPORTING
         data_object = data
@@ -1289,7 +1289,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   METHOD check_raise_srtti_installed.
 
-    IF rtti_check_class_exists( 'ZCL_SRTTI_TYPEDESCR' ) = abap_false.
+    IF rtti_check_class_exists( '/UBC/CL_SRTTI_TYPEDESCR' ) = abap_false.
 
       DATA(lv_text) = `UNSUPPORTED_FEATURE - Please install the open-source project S-RTTI by sandraros and try again: https://github.com/sandraros/S-RTTI`.
       RAISE EXCEPTION TYPE /ubc/2ui5_cx_util_error
