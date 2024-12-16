@@ -33,5 +33,7 @@ jobs:
       with:
         title: Automatic Update
     - name: auto merge
+      env:
+        GH_TOKEN: ${{ github.token }}
       if: ${{ steps.cpr.outputs.pull-request-operation }} == 'created'
       run: gh pr merge --merge --auto "${{ steps.cpr.outputs.pull-request-number }}"
