@@ -163,6 +163,10 @@ CLASS /ubc/2ui5_cl_core_srv_json IMPLEMENTATION.
           CATCH cx_root.
         ENDTRY.
 
+        result-s_control-app_start_draft = /ubc/2ui5_cl_util=>c_trim_upper(
+                                              /ubc/2ui5_cl_util=>url_param_get( val = `z2ui5-xapp-state`
+                                                                            url = result-s_front-search ) ).
+
         IF result-s_control-app_start IS NOT INITIAL.
           IF result-s_control-app_start(1) = `-`.
             REPLACE FIRST OCCURRENCE OF `-` IN result-s_control-app_start WITH `/`.
@@ -175,9 +179,11 @@ CLASS /ubc/2ui5_cl_core_srv_json IMPLEMENTATION.
                                          /ubc/2ui5_cl_util=>url_param_get( val = `app_start`
                                                                        url = result-s_front-search ) ).
 
+
       CATCH cx_root INTO DATA(x).
         RAISE EXCEPTION TYPE /ubc/2ui5_cx_util_error
-          EXPORTING val = x.
+          EXPORTING
+            val = x.
     ENDTRY.
   ENDMETHOD.
 
