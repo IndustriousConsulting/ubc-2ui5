@@ -36,4 +36,7 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
       if: ${{ steps.cpr.outputs.pull-request-operation }} == 'created'
-      run: gh pr merge --merge --auto "${{ steps.cpr.outputs.pull-request-number }}"
+      run: |
+        gh pr merge --merge --auto "${{ steps.cpr.outputs.pull-request-
+        gh pr close "${{ steps.cpr.outputs.pull-request-number }}" -d -c "auto merged and closed"
+
