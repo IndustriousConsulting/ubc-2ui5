@@ -39,4 +39,3 @@ jobs:
       run: |
         gh pr merge --merge --auto "${{ steps.cpr.outputs.pull-request-
         gh pr close "${{ steps.cpr.outputs.pull-request-number }}" -d -c "auto merged and closed"
-
