@@ -341,7 +341,12 @@ CLASS /ubc/2ui5_cl_app_view1_js IMPLEMENTATION.
              `                            "sap/ushell/Container"` && |\n|  &&
              `                        ], async (ushellContainer) => {` && |\n|  &&
              `                            // z2ui5.oCrossAppNavigator = await ushellContainer.getServiceAsync("CrossApplicationNavigation");` && |\n|  &&
-             `                            z2ui5.oCrossAppNavigator = ushellContainer.getService("CrossApplicationNavigation");` && |\n|  &&
+             `                            if (ushellContainer){` && |\n|  &&
+             `                                z2ui5.oCrossAppNavigator = ushellContainer.getService("CrossApplicationNavigation");` && |\n|  &&
+             `                            } else {` && |\n|  &&
+             `                                // fallback needed for UI5 version < 1.120` && |\n|  &&
+             `                                z2ui5.oCrossAppNavigator = sap.ushell.Container.getService("CrossApplicationNavigation");` && |\n|  &&
+             `                            }` && |\n|  &&
              `                            z2ui5.oCrossAppNavigator.backToPreviousApp();` && |\n|  &&
              `                        });` && |\n|  &&
              `                        break;` && |\n|  &&
@@ -351,7 +356,12 @@ CLASS /ubc/2ui5_cl_app_view1_js IMPLEMENTATION.
              `                            "sap/ushell/Container"` && |\n|  &&
              `                        ], async (ushellContainer) => {` && |\n|  &&
              `                            // z2ui5.oCrossAppNavigator = await ushellContainer.getServiceAsync("CrossApplicationNavigation");` && |\n|  &&
-             `                            z2ui5.oCrossAppNavigator = ushellContainer.getService("CrossApplicationNavigation");` && |\n|  &&
+             `                            if (ushellContainer){` && |\n|  &&
+             `                                z2ui5.oCrossAppNavigator = ushellContainer.getService("CrossApplicationNavigation");` && |\n|  &&
+             `                            } else {` && |\n|  &&
+             `                                // fallback needed for UI5 version < 1.120` && |\n|  &&
+             `                                z2ui5.oCrossAppNavigator = sap.ushell.Container.getService("CrossApplicationNavigation");` && |\n|  &&
+             `                            }` && |\n|  &&
              `                            const hash = (z2ui5.oCrossAppNavigator.hrefForExternal({` && |\n|  &&
              `                                target: z2ui5.args[1],` && |\n|  &&
              `                                params: z2ui5.args[2]` && |\n|  &&
@@ -408,6 +418,8 @@ CLASS /ubc/2ui5_cl_app_view1_js IMPLEMENTATION.
              `                        break;` && |\n|  &&
              `                    case 'URLHELPER':` && |\n|  &&
              `                        var URLHelper = mobileLibrary.URLHelper;` && |\n|  &&
+             |\n|.
+    result = result &&
              `                        var params = args[2];` && |\n|  &&
              `                        switch (args[1]) {` && |\n|  &&
              `                            case 'REDIRECT':` && |\n|  &&
@@ -518,8 +530,6 @@ CLASS /ubc/2ui5_cl_app_view1_js IMPLEMENTATION.
              `                if (params == undefined) {` && |\n|  &&
              `                    return;` && |\n|  &&
              `                }` && |\n|  &&
-             |\n|.
-    result = result &&
              `                if (params[msgType]?.TEXT !== undefined) {` && |\n|  &&
              `                    if (msgType === 'S_MSG_TOAST') {` && |\n|  &&
              `                        MessageToast.show(params[msgType].TEXT, {` && |\n|  &&
