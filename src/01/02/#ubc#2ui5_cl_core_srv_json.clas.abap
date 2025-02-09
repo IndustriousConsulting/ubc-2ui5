@@ -163,25 +163,26 @@ CLASS /ubc/2ui5_cl_core_srv_json IMPLEMENTATION.
 
         TRY.
             DATA(lo_comp) = result-s_front-o_comp_data.
-            result-s_control-app_start = lo_comp->get( `/startupParameters/app_start/1` ).
-            result-s_control-app_start = /ubc/2ui5_cl_util=>c_trim_upper( result-s_control-app_start ).
+            if lo_comp is bound.
+              DATA(lv_app_start) = lo_comp->get( `/startupParameters/app_start/1` ).
+
+              result-s_control-app_start = lv_app_start.
+              result-s_control-app_start = /ubc/2ui5_cl_util=>c_trim_upper( result-s_control-app_start ).
+            endif.
           CATCH cx_root.
         ENDTRY.
 
-        try.
-    "   result-s_control-app_start_draft = z2ui5_cl_util=>c_trim_upper(
-    "                                         z2ui5_cl_util=>url_param_get( val = `z2ui5-xapp-state`
-    "                                                                       url = result-s_front-search ) ).
-            data(lv_hash) = result-s_front-hash.
-            split lv_hash at '&/' into data(lv_dummy) lv_hash.
-            if lv_hash is initial.
+        TRY.
+            DATA(lv_hash) = result-s_front-hash.
+            SPLIT lv_hash AT '&/' INTO DATA(lv_dummy) lv_hash.
+            IF lv_hash IS INITIAL.
               lv_hash = result-s_front-hash+2.
-            endif.
+            ENDIF.
             result-s_control-app_start_draft = /ubc/2ui5_cl_util=>c_trim_upper(
                                            /ubc/2ui5_cl_util=>url_param_get( val = `z2ui5-xapp-state`
                                                                          url = lv_hash ) ).
-          catch cx_root.
-        endtry.
+          CATCH cx_root.
+        ENDTRY.
         IF result-s_control-app_start IS NOT INITIAL.
           IF result-s_control-app_start(1) = `-`.
             REPLACE FIRST OCCURRENCE OF `-` IN result-s_control-app_start WITH `/`.

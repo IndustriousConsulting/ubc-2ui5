@@ -1,6 +1,6 @@
 CLASS /ubc/2ui5_cl_util DEFINITION
   PUBLIC
-  INHERITING FROM /ubc/2ui5_cl_abap_api
+  INHERITING FROM /ubc/2ui5_cl_util_abap
   CREATE PUBLIC.
 
   PUBLIC SECTION.
@@ -96,7 +96,7 @@ CLASS /ubc/2ui5_cl_util DEFINITION
         rollname      TYPE clike
         langu         TYPE clike DEFAULT sy-langu
       RETURNING
-        VALUE(result) TYPE /ubc/2ui5_cl_abap_api=>ty_t_fix_val ##NEEDED.
+        VALUE(result) TYPE /ubc/2ui5_cl_util_abap=>ty_t_fix_val ##NEEDED.
 
     CLASS-METHODS source_get_method2
       IMPORTING
@@ -802,7 +802,8 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     ENDLOOP.
 
     DATA(struc) = cl_abap_structdescr=>get( lt_comp ).
-    DATA(o_table_desc) = cl_abap_tabledescr=>create( p_line_type  = CAST #( struc )
+    DATA(data) = CAST cl_abap_datadescr( struc ).
+    DATA(o_table_desc) = cl_abap_tabledescr=>create( p_line_type  = data
                                                      p_table_kind = cl_abap_tabledescr=>tablekind_std
                                                      p_unique     = abap_false ).
 
@@ -1243,10 +1244,10 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
       TRY.
           CALL METHOD /ubc/2ui5_cl_srt_typedescr=>('CREATE_BY_DATA_OBJECT')
-        EXPORTING
-          data_object = data
-        RECEIVING
-          srtti       = srtti.
+            EXPORTING
+              data_object = data
+            RECEIVING
+              srtti       = srtti.
 
           CALL TRANSFORMATION id SOURCE srtti = srtti dobj = data RESULT XML result.
 
