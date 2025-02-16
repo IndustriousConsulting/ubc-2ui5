@@ -74,7 +74,9 @@ CLASS /ubc/2ui5_cl_core_srv_json IMPLEMENTATION.
           lo_val_front->to_abap( IMPORTING ev_container = <val> ).
 
         CATCH cx_root INTO DATA(x).
-          /ubc/2ui5_cl_util=>x_raise( |JSON_PARSING_ERROR: { x->get_text( ) } | ).
+          RAISE EXCEPTION TYPE /ubc/2ui5_cx_util_error
+            EXPORTING
+              val = |JSON_PARSING_ERROR: { x->get_text( ) } |.
       ENDTRY.
     ENDLOOP.
 
@@ -162,13 +164,12 @@ CLASS /ubc/2ui5_cl_core_srv_json IMPLEMENTATION.
         ENDIF.
 
         TRY.
-            DATA(lo_comp) = result-s_front-o_comp_data.
-            if lo_comp is bound.
+            IF result-s_front-o_comp_data IS BOUND.
+              DATA(lo_comp) = result-s_front-o_comp_data.
               DATA(lv_app_start) = lo_comp->get( `/startupParameters/app_start/1` ).
-
               result-s_control-app_start = lv_app_start.
               result-s_control-app_start = /ubc/2ui5_cl_util=>c_trim_upper( result-s_control-app_start ).
-            endif.
+            ENDIF.
           CATCH cx_root.
         ENDTRY.
 
