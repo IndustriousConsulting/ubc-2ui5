@@ -53,7 +53,7 @@ CLASS /ubc/2ui5_cl_pop_get_range IMPLEMENTATION.
 
     /ubc/2ui5_cl_util=>itab_corresponding( EXPORTING val = t_range
                                        CHANGING  tab = r_result->ms_result-t_range
-    ).
+      ).
 
     INSERT VALUE #( ) INTO TABLE r_result->ms_result-t_range.
 

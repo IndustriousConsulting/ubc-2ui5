@@ -123,7 +123,7 @@ CLASS /ubc/2ui5_cl_http_handler IMPLEMENTATION.
 
     result = NEW #( ).
     result->mo_server = /ubc/2ui5_cl_util_abap_http=>factory_cloud( req = req
-                                                               res = res ).
+                                                               res  = res ).
 
   ENDMETHOD.
 
@@ -145,8 +145,8 @@ CLASS /ubc/2ui5_cl_http_handler IMPLEMENTATION.
 
     IF is_config-content_security_policy IS INITIAL.
       is_config-content_security_policy = |<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: | &&
-     |ui5.sap.com *.ui5.sap.com sapui5.hana.ondemand.com *.sapui5.hana.ondemand.com openui5.hana.ondemand.com *.openui5.hana.ondemand.com | &&
-     |sdk.openui5.org *.sdk.openui5.org cdn.jsdelivr.net *.cdn.jsdelivr.net cdnjs.cloudflare.com *.cdnjs.cloudflare.com schemas *.schemas; worker-src 'self' blob:; "/>|.
+        |ui5.sap.com *.ui5.sap.com sapui5.hana.ondemand.com *.sapui5.hana.ondemand.com openui5.hana.ondemand.com *.openui5.hana.ondemand.com | &&
+        |sdk.openui5.org *.sdk.openui5.org cdn.jsdelivr.net *.cdn.jsdelivr.net cdnjs.cloudflare.com *.cdnjs.cloudflare.com schemas *.schemas; worker-src 'self' blob:; "/>|.
     ENDIF.
 
     IF is_config-styles_css IS INITIAL.
@@ -172,7 +172,7 @@ CLASS /ubc/2ui5_cl_http_handler IMPLEMENTATION.
              |      "z2ui5/css/style.css": '{ lv_style_css }',| && |\n| &&
              |      "z2ui5/manifest.json": '{ /ubc/2ui5_cl_app_manifest_json=>get( ) }',| && |\n| &&
              |      "z2ui5/Component.js": function()\{{ /ubc/2ui5_cl_app_component_js=>get( ) }{ is_config-custom_js }\},| && |\n| &&
-             |      "z2ui5/model/models.js": function()\{{  /ubc/2ui5_cl_app_models_js=>get( ) }\},| && |\n| &&
+             |      "z2ui5/model/models.js": function()\{{ /ubc/2ui5_cl_app_models_js=>get( ) }\},| && |\n| &&
              |      "z2ui5/view/App.view.xml": '{ /ubc/2ui5_cl_app_app_xml=>get( ) }',| && |\n| &&
              |      "z2ui5/controller/App.controller.js": function()\{{ /ubc/2ui5_cl_app_app_js=>get( ) }\},| && |\n| &&
              |      "z2ui5/view/View1.view.xml": '{ /ubc/2ui5_cl_app_view1_xml=>get( ) }',| && |\n| &&
@@ -230,7 +230,7 @@ CLASS /ubc/2ui5_cl_http_handler IMPLEMENTATION.
 
     " transform cookie to header based contextid handling
     IF ms_res-s_stateful-switched = abap_true.
-      mo_server->set_session_stateful( ms_res-s_stateful-active  ).
+      mo_server->set_session_stateful( ms_res-s_stateful-active ).
       IF mo_server->get_header_field( 'sap-contextid-accept' ) = 'header'.
         DATA(lv_contextid) = mo_server->get_response_cookie( 'sap-contextid' ).
         IF lv_contextid IS NOT INITIAL.
@@ -290,7 +290,7 @@ CLASS /ubc/2ui5_cl_http_handler IMPLEMENTATION.
     DATA(lo_handler) = factory( server = server
                                 req    = req
                                 res    = res
-     ).
+      ).
 
     result-body   = lo_handler->mo_server->get_cdata( ).
     result-method = lo_handler->mo_server->get_method( ).
@@ -302,7 +302,7 @@ CLASS /ubc/2ui5_cl_http_handler IMPLEMENTATION.
     DATA(lo_handler) = factory( server = server
                                 req    = req
                                 res    = res
-     ).
+      ).
 
     lo_handler->mo_server->set_cdata( is_res-body ).
     lo_handler->mo_server->set_header_field( n = `cache-control`
@@ -312,7 +312,7 @@ CLASS /ubc/2ui5_cl_http_handler IMPLEMENTATION.
 
     " transform cookie to header based contextid handling
     IF is_res-s_stateful-switched = abap_true.
-      lo_handler->mo_server->set_session_stateful( is_res-s_stateful-active  ).
+      lo_handler->mo_server->set_session_stateful( is_res-s_stateful-active ).
       IF lo_handler->mo_server->get_header_field( 'sap-contextid-accept' ) = 'header'.
         DATA(lv_contextid) = lo_handler->mo_server->get_response_cookie( 'sap-contextid' ).
         IF lv_contextid IS NOT INITIAL.

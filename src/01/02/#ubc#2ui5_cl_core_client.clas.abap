@@ -95,7 +95,7 @@ CLASS /ubc/2ui5_cl_core_client IMPLEMENTATION.
                                    WHEN 'E' THEN `Error`
                                    WHEN 'S' THEN `Success`
                                    WHEN `W` THEN `Warning`
-                                   ELSE          `Information` ).
+                                   ELSE `Information` ).
 
       ELSEIF lines( lt_msg ) > 1.
         lv_text = | { lines( lt_msg ) } Messages found: |.
@@ -109,7 +109,7 @@ CLASS /ubc/2ui5_cl_core_client IMPLEMENTATION.
                                WHEN 'E' THEN `Error`
                                WHEN 'S' THEN `Success`
                                WHEN `W` THEN `Warning`
-                               ELSE          `Information` ).
+                               ELSE `Information` ).
         ENDIF.
         lv_type = /ubc/2ui5_cl_util=>ui5_get_msg_type( lt_msg[ 1 ]-type ).
       ELSE.
@@ -296,7 +296,7 @@ CLASS /ubc/2ui5_cl_core_client IMPLEMENTATION.
   METHOD /ubc/2ui5_if_client~view_display.
 
     mo_action->ms_next-s_set-s_view-xml = val.
-    mo_action->ms_next-s_set-s_view-switchDefaultModelAnnoURI = switch_default_model_anno_uri.
+    mo_action->ms_next-s_set-s_view-switchdefaultmodelannouri = switch_default_model_anno_uri.
     mo_action->ms_next-s_set-s_view-switch_default_model_path = switch_default_model_path.
 
   ENDMETHOD.
@@ -312,12 +312,12 @@ CLASS /ubc/2ui5_cl_core_client IMPLEMENTATION.
     DATA(lo_bind) = NEW /ubc/2ui5_cl_core_srv_bind( mo_action->mo_app ).
     result = lo_bind->main( val    = /ubc/2ui5_cl_util=>conv_get_as_data_ref( val )
                             type   = /ubc/2ui5_if_core_types=>cs_bind_type-one_way
-                            config = VALUE #( path_only     = path
-                                              custom_filter = custom_filter
-                                              custom_mapper = custom_mapper
-                                              tab           = /ubc/2ui5_cl_util=>conv_get_as_data_ref( tab )
-                                              tab_index     = tab_index
-                                              switch_default_model = switch_Default_Model ) ).
+                            config = VALUE #( path_only            = path
+                                              custom_filter        = custom_filter
+                                              custom_mapper        = custom_mapper
+                                              tab                  = /ubc/2ui5_cl_util=>conv_get_as_data_ref( tab )
+                                              tab_index            = tab_index
+                                              switch_default_model = switch_default_model ) ).
 
 
   ENDMETHOD.
@@ -327,14 +327,14 @@ CLASS /ubc/2ui5_cl_core_client IMPLEMENTATION.
     DATA(lo_bind) = NEW /ubc/2ui5_cl_core_srv_bind( mo_action->mo_app ).
     result = lo_bind->main( val    = /ubc/2ui5_cl_util=>conv_get_as_data_ref( val )
                             type   = /ubc/2ui5_if_core_types=>cs_bind_type-two_way
-                            config = VALUE #( path_only          = path
-                                              custom_filter      = custom_filter
-                                              custom_filter_back = custom_filter_back
-                                              custom_mapper      = custom_mapper
-                                              custom_mapper_back = custom_mapper_back
-                                              tab                = /ubc/2ui5_cl_util=>conv_get_as_data_ref( tab )
-                                              tab_index          = tab_index
-                                              switch_default_model = switch_Default_Model ) ).
+                            config = VALUE #( path_only            = path
+                                              custom_filter        = custom_filter
+                                              custom_filter_back   = custom_filter_back
+                                              custom_mapper        = custom_mapper
+                                              custom_mapper_back   = custom_mapper_back
+                                              tab                  = /ubc/2ui5_cl_util=>conv_get_as_data_ref( tab )
+                                              tab_index            = tab_index
+                                              switch_default_model = switch_default_model ) ).
 
   ENDMETHOD.
 
@@ -342,10 +342,10 @@ CLASS /ubc/2ui5_cl_core_client IMPLEMENTATION.
 
     DATA(lo_bind) = NEW /ubc/2ui5_cl_core_srv_bind( mo_action->mo_app ).
     result = lo_bind->main_local( val    = val
-                                  config = VALUE #( path_only     = path
-                                                    custom_mapper = custom_mapper
-                                                    custom_filter = custom_filter
-                                                    switch_default_model = switch_Default_Model ) ).
+                                  config = VALUE #( path_only            = path
+                                                    custom_mapper        = custom_mapper
+                                                    custom_filter        = custom_filter
+                                                    switch_default_model = switch_default_model ) ).
 
   ENDMETHOD.
 
@@ -418,7 +418,7 @@ CLASS /ubc/2ui5_cl_core_client IMPLEMENTATION.
 
   METHOD /ubc/2ui5_if_client~check_on_init.
 
-    result = xsdbool( CAST /ubc/2ui5_if_app(  mo_action->mo_app->mo_app )->check_initialized = abap_false ).
+    result = xsdbool( CAST /ubc/2ui5_if_app( mo_action->mo_app->mo_app )->check_initialized = abap_false ).
 
   ENDMETHOD.
 

@@ -351,6 +351,12 @@ CLASS /ubc/2ui5_cl_util DEFINITION
       RETURNING
         VALUE(result) TYPE abap_bool.
 
+    CLASS-METHODS rtti_create_tab_by_name
+      IMPORTING
+        val           TYPE clike
+      RETURNING
+        VALUE(result) TYPE REF TO data.
+
     CLASS-METHODS rtti_check_type_kind_dref
       IMPORTING
         val           TYPE any
@@ -1431,6 +1437,15 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
                        WHEN 'S' THEN `Success`
                        WHEN `W` THEN `Warning`
                        ELSE `Information` ).
+
+  ENDMETHOD.
+
+  METHOD rtti_create_tab_by_name.
+
+    DATA(struct_desc) = cl_abap_structdescr=>describe_by_name( val ).
+    DATA(data_desc) = CAST cl_abap_datadescr( struct_desc ).
+    DATA(gr_dyntable_typ) = cl_abap_tabledescr=>create( data_desc ).
+    CREATE DATA result TYPE HANDLE gr_dyntable_typ.
 
   ENDMETHOD.
 

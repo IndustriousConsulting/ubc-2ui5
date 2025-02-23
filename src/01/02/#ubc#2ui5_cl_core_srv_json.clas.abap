@@ -49,7 +49,7 @@ CLASS /ubc/2ui5_cl_core_srv_json IMPLEMENTATION.
     ENDIF.
 
     LOOP AT t_attri->* REFERENCE INTO DATA(lr_attri)
-         WHERE     bind_type = /ubc/2ui5_if_core_types=>cs_bind_type-two_way
+         WHERE bind_type = /ubc/2ui5_if_core_types=>cs_bind_type-two_way
                AND view      = lv_view.
       TRY.
 
@@ -99,7 +99,7 @@ CLASS /ubc/2ui5_cl_core_srv_json IMPLEMENTATION.
 
           CASE lr_attri->bind_type.
             WHEN /ubc/2ui5_if_core_types=>cs_bind_type-one_way
-            OR /ubc/2ui5_if_core_types=>cs_bind_type-two_way.
+                OR /ubc/2ui5_if_core_types=>cs_bind_type-two_way.
 
               ASSIGN lr_attri->r_ref->* TO FIELD-SYMBOL(<attribute>).
               IF sy-subrc <> 0.
@@ -155,7 +155,7 @@ CLASS /ubc/2ui5_cl_core_srv_json IMPLEMENTATION.
 
         result-s_front-o_comp_data = lo_ajson->slice( `/CONFIG/ComponentData` ).
 
-        result-s_control-check_launchpad = xsdbool(    result-s_front-search   CS `scenario=LAUNCHPAD`
+        result-s_control-check_launchpad = xsdbool( result-s_front-search   CS `scenario=LAUNCHPAD`
                                                     OR result-s_front-pathname CS `/ui2/flp`
                                                     OR result-s_front-pathname CS `test/flpSandbox`
              ).
