@@ -68,7 +68,7 @@ INTERFACE /ubc/2ui5_if_core_types
     BEGIN OF ty_s_next_frontend,
       BEGIN OF s_view,
         xml                       TYPE string,
-        switchDefaultModelAnnoURI TYPE string,
+        switchdefaultmodelannouri TYPE string,
         switch_default_model_path TYPE string,
         check_destroy             TYPE abap_bool,
         check_update_model        TYPE abap_bool,
@@ -209,7 +209,5 @@ INTERFACE /ubc/2ui5_if_core_types
       s_config           TYPE ty_s_config,
       r_data             TYPE REF TO data,
     END OF ty_s_actual.
-
-  TYPES ty_s_db TYPE /ubc/2ui5_t_01.
 
 ENDINTERFACE.
