@@ -172,6 +172,14 @@ CLASS /ubc/2ui5_cl_xml_view DEFINITION
       RETURNING
         VALUE(result)  TYPE REF TO /ubc/2ui5_cl_xml_view.
 
+    METHODS overflow_toolbar_layout_data
+      IMPORTING
+        priority                   TYPE clike OPTIONAL
+        group                      TYPE clike OPTIONAL
+        closeoverflowoninteraction TYPE clike OPTIONAL
+      RETURNING
+        VALUE(result)              TYPE REF TO /ubc/2ui5_cl_xml_view.
+
     METHODS table
       IMPORTING
         id                  TYPE clike OPTIONAL
@@ -507,6 +515,7 @@ CLASS /ubc/2ui5_cl_xml_view DEFINITION
     METHODS avatar
       IMPORTING
         ns                TYPE clike OPTIONAL
+        !id               TYPE clike OPTIONAL
         src               TYPE clike OPTIONAL
         class             TYPE clike OPTIONAL
         displaysize       TYPE clike OPTIONAL
@@ -701,6 +710,7 @@ CLASS /ubc/2ui5_cl_xml_view DEFINITION
       IMPORTING
         showclearicon    TYPE clike OPTIONAL
         showvaluehelp    TYPE clike OPTIONAL
+        valuehelponly    TYPE clike OPTIONAL
         name             TYPE clike OPTIONAL
         suggestionitems  TYPE clike OPTIONAL
         tokenupdate      TYPE clike OPTIONAL
@@ -1621,6 +1631,7 @@ CLASS /ubc/2ui5_cl_xml_view DEFINITION
         select                 TYPE clike OPTIONAL
         delete                 TYPE clike OPTIONAL
         class                  TYPE clike OPTIONAL
+       PREFERRED PARAMETER items
       RETURNING
         VALUE(result)          TYPE REF TO /ubc/2ui5_cl_xml_view.
 
@@ -2134,6 +2145,10 @@ CLASS /ubc/2ui5_cl_xml_view DEFINITION
         VALUE(result) TYPE REF TO /ubc/2ui5_cl_xml_view.
 
     METHODS tree_template
+      RETURNING
+        VALUE(result) TYPE REF TO /ubc/2ui5_cl_xml_view.
+
+    METHODS tree_extension
       RETURNING
         VALUE(result) TYPE REF TO /ubc/2ui5_cl_xml_view.
 
@@ -5273,6 +5288,15 @@ CLASS /ubc/2ui5_cl_xml_view DEFINITION
         maxlength            TYPE clike DEFAULT '0'
       RETURNING
         VALUE(result)        TYPE REF TO /ubc/2ui5_cl_xml_view.
+
+    METHODS row_settings
+      IMPORTING
+        highlight     TYPE clike OPTIONAL
+        highlighttext TYPE clike OPTIONAL
+        navigated     TYPE clike OPTIONAL
+      RETURNING
+        VALUE(result) TYPE REF TO /ubc/2ui5_cl_xml_view.
+
   PROTECTED SECTION.
     DATA mv_name     TYPE string.
     DATA mv_ns       TYPE string.
@@ -5387,7 +5411,8 @@ CLASS /ubc/2ui5_cl_xml_view IMPLEMENTATION.
     result = me.
     _generic( name   = `Avatar`
               ns     = ns
-              t_prop = VALUE #( ( n = `src`         v = src )
+              t_prop = VALUE #( ( n = `id` v = id )
+                                ( n = `src`         v = src )
                                 ( n = `class`       v = class )
                                 ( n = `ariaHasPopup`       v = ariahaspopup )
                                 ( n = `backgroundColor`       v = backgroundcolor )
@@ -6256,8 +6281,7 @@ CLASS /ubc/2ui5_cl_xml_view IMPLEMENTATION.
 
   METHOD drag_drop_config.
     result = _generic( name  = `dragDropConfig`
-                          ns = ns
-                       ).
+                          ns = ns ).
   ENDMETHOD.
 
   METHOD dynamic_page.
@@ -7949,6 +7973,7 @@ CLASS /ubc/2ui5_cl_xml_view IMPLEMENTATION.
         t_prop = VALUE #( ( n = `tokens` v = tokens )
                           ( n = `showClearIcon` v = /ubc/2ui5_cl_util=>boolean_abap_2_json( showclearicon ) )
                           ( n = `name` v = name )
+                          ( n = `valueHelpOnly` v = /ubc/2ui5_cl_util=>boolean_abap_2_json( valuehelponly ) )
                           ( n = `showValueHelp` v = /ubc/2ui5_cl_util=>boolean_abap_2_json( showvaluehelp ) )
                           ( n = `enabled` v = /ubc/2ui5_cl_util=>boolean_abap_2_json( enabled ) )
                           ( n = `suggestionItems` v = suggestionitems )
@@ -10088,6 +10113,12 @@ CLASS /ubc/2ui5_cl_xml_view IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD tree_extension.
+    result = _generic( ns   = `table`
+                       name = `extension` ).
+  ENDMETHOD.
+
+
   METHOD two_columns_layout.
     result = _generic( name = `TwoColumnsLayout`
                        ns   = `nglayout` ).
@@ -10982,8 +11013,7 @@ CLASS /ubc/2ui5_cl_xml_view IMPLEMENTATION.
   METHOD _control_configuration.
 
     result = _generic( name = `controlConfiguration`
-                        ns  = `smartFilterBar`
-                      ).
+                        ns  = `smartFilterBar` ).
 
   ENDMETHOD.
 
@@ -11122,4 +11152,22 @@ CLASS /ubc/2ui5_cl_xml_view IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD overflow_toolbar_layout_data.
+
+    result = _generic(
+        name   = `OverflowToolbarLayoutData`
+        t_prop = VALUE #(
+            ( n = `closeOverflowOnInteraction` v = /ubc/2ui5_cl_util=>boolean_abap_2_json( closeoverflowoninteraction ) )
+            ( n = `group`                      v = group )
+            ( n = `priority`                   v = priority ) ) ).
+
+  ENDMETHOD.
+
+  METHOD row_settings.
+    result = _generic( name    = `RowSettings`
+                       ns      = `table`
+                        t_prop = VALUE #( ( n = `highlight`       v = highlight )
+                                          ( n = `highlightText`   v = highlighttext )
+                                          ( n = `navigated`       v = /ubc/2ui5_cl_util=>boolean_abap_2_json( navigated ) ) ) ).
+  ENDMETHOD.
 ENDCLASS.

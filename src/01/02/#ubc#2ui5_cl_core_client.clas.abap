@@ -40,11 +40,16 @@ CLASS /ubc/2ui5_cl_core_client IMPLEMENTATION.
                       s_draft                = CORRESPONDING #( mo_action->mo_app->ms_draft )
                       check_on_navigated     = mo_action->ms_actual-check_on_navigated
                       s_config               = CORRESPONDING #( mo_action->mo_http_post->ms_request-s_front )
-                      r_event_data           = mo_action->ms_actual-r_data
-      ).
+                      r_event_data           = mo_action->ms_actual-r_data ).
 
     TRY.
-        DATA(lo_params) = mo_action->mo_http_post->ms_request-s_front-o_comp_data->slice( `/startupParameters/` ).
+
+        DATA(lo_comp) = mo_action->mo_http_post->ms_request-s_front-o_comp_data.
+        IF lo_comp IS NOT BOUND.
+          RETURN.
+        ENDIF.
+        DATA(lo_params) = lo_comp->slice( `/startupParameters/` ).
+
         IF lo_params IS NOT BOUND.
           RETURN.
         ENDIF.
@@ -144,8 +149,7 @@ CLASS /ubc/2ui5_cl_core_client IMPLEMENTATION.
                                                   textdirection     = textdirection
                                                   icon              = icon
                                                   details           = lv_details
-                                                  closeonnavigation = closeonnavigation
-                                               ).
+                                                  closeonnavigation = closeonnavigation ).
 
   ENDMETHOD.
 
@@ -164,8 +168,7 @@ CLASS /ubc/2ui5_cl_core_client IMPLEMENTATION.
                                                     animationtimingfunction  = animationtimingfunction
                                                     animationduration        = animationduration
                                                     closeonbrowsernavigation = closeonbrowsernavigation
-                                                    class                    = class
-                                                  ).
+                                                    class                    = class ).
 
   ENDMETHOD.
 
@@ -295,7 +298,17 @@ CLASS /ubc/2ui5_cl_core_client IMPLEMENTATION.
 
   METHOD /ubc/2ui5_if_client~view_display.
 
-    mo_action->ms_next-s_set-s_view-xml = val.
+    IF /ubc/2ui5_cl_util=>rtti_check_clike( val ).
+      mo_action->ms_next-s_set-s_view-xml = val.
+    ELSE.
+
+      DATA lo_object TYPE REF TO object.
+      lo_object ?= val.
+      CALL METHOD lo_object->('STRINGIFY')
+        RECEIVING
+          result = mo_action->ms_next-s_set-s_view-xml.
+    ENDIF.
+
     mo_action->ms_next-s_set-s_view-switchdefaultmodelannouri = switch_default_model_anno_uri.
     mo_action->ms_next-s_set-s_view-switch_default_model_path = switch_default_model_path.
 

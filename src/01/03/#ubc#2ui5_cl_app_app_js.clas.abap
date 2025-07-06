@@ -480,6 +480,74 @@ CLASS /ubc/2ui5_cl_app_app_js IMPLEMENTATION.
              `}` && |\n| &&
              `);` && |\n| &&
              `` && |\n| &&
+             `sap.ui.define("z2ui5/Storage", ["sap/ui/core/Control", "sap/ui/util/Storage"], (Control, Storage) => {` && |\n| &&
+             `  "use strict";` && |\n| &&
+             `` && |\n| &&
+             `  return Control.extend("z2ui5.Storage", {` && |\n| &&
+             `    metadata: {` && |\n| &&
+             `      properties: {` && |\n| &&
+             `        type: {` && |\n| &&
+             `          type: "string",` && |\n| &&
+             `          defaultValue: "session"` && |\n| &&
+             `        },` && |\n| &&
+             `        prefix: {` && |\n| &&
+             `          type: "string",` && |\n| &&
+             `          defaultValue: ""` && |\n| &&
+             `        },` && |\n| &&
+             `        key: {` && |\n| &&
+             `          type: "string",` && |\n| &&
+             `          defaultValue: ""` && |\n| &&
+             `        },` && |\n| &&
+             `        value: {` && |\n| &&
+             `          type: "any",` && |\n| &&
+             `          defaultValue: ""` && |\n| &&
+             `        }` && |\n| &&
+             `      },` && |\n| &&
+             `      events: {` && |\n| &&
+             `        "finished": {` && |\n| &&
+             `          parameters: {` && |\n| &&
+             `            type: {` && |\n| &&
+             `              type: "string",` && |\n| &&
+             `            },` && |\n| &&
+             `            prefix: {` && |\n| &&
+             `              type: "string",` && |\n| &&
+             `            },` && |\n| &&
+             `            key: {` && |\n| &&
+             `              type: "string",` && |\n| &&
+             `            },` && |\n| &&
+             `            value: {` && |\n| &&
+             `              type: "any",` && |\n| &&
+             `            }` && |\n| &&
+             `          }` && |\n| &&
+             `        }` && |\n| &&
+             `      }` && |\n| &&
+             `    },` && |\n| &&
+             `` && |\n| &&
+             `    async renderer(_, oControl) {` && |\n| &&
+             `      let storageType = oControl.getProperty("type");` && |\n| &&
+             `      let storageKeyPrefix = oControl.getProperty("prefix");` && |\n| &&
+             `      let storageKey  = oControl.getProperty("key");` && |\n| &&
+             `      let storageValue = oControl.getProperty("value");` && |\n| &&
+             `      let oStorage = new Storage(storageType, storageKeyPrefix);` && |\n| &&
+             `      let storedValue = oStorage.get(storageKey);` && |\n| &&
+             `      if (storedValue == null) {` && |\n| &&
+             `        storedValue = "";` && |\n| &&
+             `      }` && |\n| &&
+             `      if (storedValue !== storageValue) {` && |\n| &&
+             `         oControl.setProperty("value", storedValue);` && |\n| &&
+             `         oControl.fireFinished({` && |\n| &&
+             `           "type": storageType,` && |\n| &&
+             `           "prefix": storageKeyPrefix,` && |\n| &&
+             `           "key": storageKey,` && |\n| &&
+             `           "value": storedValue` && |\n| &&
+             `         });` && |\n| &&
+             `       }` && |\n| &&
+             `    },` && |\n| &&
+             `    onAfterRendering() { },` && |\n| &&
+             `    init() { }` && |\n| &&
+             `  });` && |\n| &&
+             `});` && |\n| &&
+             `` && |\n| &&
              `sap.ui.define("z2ui5/FileUploader", ["sap/ui/core/Control", "sap/m/Button", "sap/ui/unified/FileUploader", "sap/m/HBox"], function (Control, Button, FileUploader, HBox) {` && |\n| &&
              `  "use strict";` && |\n| &&
              `` && |\n| &&
@@ -752,6 +820,8 @@ CLASS /ubc/2ui5_cl_app_app_js IMPLEMENTATION.
              `        },` && |\n| &&
              `        addedTokens: {` && |\n| &&
              `          type: "Array"` && |\n| &&
+             |\n|.
+    result = result &&
              `        },` && |\n| &&
              `        removedTokens: {` && |\n| &&
              `          type: "Array"` && |\n| &&
@@ -820,8 +890,6 @@ CLASS /ubc/2ui5_cl_app_app_js IMPLEMENTATION.
              `            const sKeyNameNew = aEntry[0].toLowerCase();` && |\n| &&
              `            oRangeDataNew[(sKeyNameNew === "keyfield" ? "keyField" : sKeyNameNew)] = aEntry[1];` && |\n| &&
              `          });` && |\n| &&
-             |\n|.
-    result = result &&
              `          return oRangeDataNew;` && |\n| &&
              `        }));` && |\n| &&
              `        //we need to set token text explicitly, as setRangeData does no recalculation` && |\n| &&
@@ -987,13 +1055,15 @@ CLASS /ubc/2ui5_cl_app_app_js IMPLEMENTATION.
              `      properties: {` && |\n| &&
              `        tableId: {` && |\n| &&
              `          type: "String"` && |\n| &&
-             `        }` && |\n| &&
-             `      }` && |\n| &&
+             `        },` && |\n| &&
+             `      },` && |\n| &&
              `    },` && |\n| &&
              `` && |\n| &&
              `    init() {` && |\n| &&
              `      z2ui5.onBeforeRoundtrip.push(this.readFilter.bind(this));` && |\n| &&
+             `      z2ui5.onBeforeRoundtrip.push(this.readSort.bind(this));` && |\n| &&
              `      z2ui5.onAfterRoundtrip.push(this.setFilter.bind(this));` && |\n| &&
+             `      z2ui5.onAfterRoundtrip.push(this.setSort.bind(this));` && |\n| &&
              `    },` && |\n| &&
              `` && |\n| &&
              `    readFilter() {` && |\n| &&
@@ -1011,12 +1081,84 @@ CLASS /ubc/2ui5_cl_app_app_js IMPLEMENTATION.
              `          let id = this.getProperty("tableId");` && |\n| &&
              `          let oTable = z2ui5.oView.byId(id);` && |\n| &&
              `          oTable.getBinding().filter(aFilters);` && |\n| &&
+             `          var opSymbols = {` && |\n| &&
+             `  EQ: "",` && |\n| &&
+             `  NE: "!",` && |\n| &&
+             `  LT: "<",` && |\n| &&
+             `  LE: "<=",` && |\n| &&
+             `  GT: ">",` && |\n| &&
+             `  GE: ">=",` && |\n| &&
+             `  BT: "...",` && |\n| &&
+             `  Contains: "*",` && |\n| &&
+             `  StartsWith: "^",` && |\n| &&
+             `  EndsWith: "$"` && |\n| &&
+             `};` && |\n| &&
+             `` && |\n| &&
+             `aFilters.forEach(function(oFilter) {` && |\n| &&
+             `  var sProperty = oFilter.sPath || oFilter.aFilters?.[0]?.sPath;` && |\n| &&
+             `  if (!sProperty) return;` && |\n| &&
+             `` && |\n| &&
+             `  oTable.getColumns().forEach(function(oCol) {` && |\n| &&
+             `    if (oCol.getFilterProperty && oCol.getFilterProperty() === sProperty) {` && |\n| &&
+             `      var operator = oFilter.sOperator;` && |\n| &&
+             `      var vValue = oFilter.oValue1 !== undefined ? oFilter.oValue1 : oFilter.oValue2;` && |\n| &&
+             `` && |\n| &&
+             `      if (vValue === undefined && oFilter.aFilters && oFilter.aFilters[0].oValue1 !== undefined) {` && |\n| &&
+             `        vValue = oFilter.aFilters[0].oValue1;` && |\n| &&
+             `      }` && |\n| &&
+             `` && |\n| &&
+             `      var display;` && |\n| &&
+             `      if (operator === "BT") {` && |\n| &&
+             `        var vValue2 = oFilter.oValue2 !== undefined ? oFilter.oValue2 : "";` && |\n| &&
+             `        display = (vValue != null ? vValue : "") + opSymbols["BT"] + (vValue2 != null ? vValue2 : "");` && |\n| &&
+             `      } else if (operator === "Contains") {` && |\n| &&
+             `        display = "*" + (vValue != null ? vValue : "") + "*";` && |\n| &&
+             `      } else if (operator === "StartsWith") {` && |\n| &&
+             `        display = "^" + (vValue != null ? vValue : "");` && |\n| &&
+             `      } else if (operator === "EndsWith") {` && |\n| &&
+             `        display = (vValue != null ? vValue : "") + "$";` && |\n| &&
+             `      } else {` && |\n| &&
+             `        display = (opSymbols[operator] || "") + (vValue != null ? vValue : "");` && |\n| &&
+             `      }` && |\n| &&
+             `` && |\n| &&
+             `      oCol.setFilterValue(display);` && |\n| &&
+             `      oCol.setFiltered(!!display);` && |\n| &&
+             `    }` && |\n| &&
+             `  });` && |\n| &&
+             `});` && |\n| &&
+             `` && |\n| &&
              `        }` && |\n| &&
              `          , 100, this.aFilters);` && |\n| &&
              `      } catch (e) { }` && |\n| &&
              `      ;` && |\n| &&
              `    },` && |\n| &&
+             `readSort() {` && |\n| &&
+             `  try {` && |\n| &&
+             `    let id = this.getProperty("tableId");` && |\n| &&
+             `    let oTable = z2ui5.oView.byId(id);` && |\n| &&
+             `    this.aSorters = oTable.getBinding().aSorters;` && |\n| &&
+             `  } catch (e) {}` && |\n| &&
+             `},` && |\n| &&
              `` && |\n| &&
+             `setSort() {` && |\n| &&
+             `  try {` && |\n| &&
+             `    setTimeout((aSorters) => {` && |\n| &&
+             `      let id = this.getProperty("tableId");` && |\n| &&
+             `      let oTable = z2ui5.oView.byId(id);` && |\n| &&
+             `      oTable.getBinding().sort(aSorters);` && |\n| &&
+             `` && |\n| &&
+             `      aSorters.forEach(function(srt, idx) {` && |\n| &&
+             `        oTable.getColumns().forEach(function(oCol) {` && |\n| &&
+             `          if (oCol.getSortProperty && oCol.getSortProperty() === srt.sPath) {` && |\n| &&
+             `            oCol.setSorted(true);` && |\n| &&
+             `            oCol.setSortOrder(srt.bDescending ? "Descending" : "Ascending");` && |\n| &&
+             `            if (oCol.setSortIndex) oCol.setSortIndex(idx);` && |\n| &&
+             `          }` && |\n| &&
+             `        });` && |\n| &&
+             `      });` && |\n| &&
+             `    }, 100, this.aSorters);` && |\n| &&
+             `  } catch (e) {}` && |\n| &&
+             `},` && |\n| &&
              `    renderer(oRM, oControl) { }` && |\n| &&
              `  });` && |\n| &&
              `}` && |\n| &&
@@ -1080,6 +1222,8 @@ CLASS /ubc/2ui5_cl_app_app_js IMPLEMENTATION.
              `        } else {` && |\n| &&
              `          window.onbeforeunload = function (e) {` && |\n| &&
              `          if (val) {` && |\n| &&
+             |\n|.
+    result = result &&
              `            e.preventDefault();` && |\n| &&
              `          }` && |\n| &&
              `        }` && |\n| &&

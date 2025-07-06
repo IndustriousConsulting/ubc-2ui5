@@ -85,9 +85,26 @@ CLASS /ubc/2ui5_cl_util DEFINITION
       RETURNING
         VALUE(result) TYPE ty_t_msg.
 
+    CLASS-METHODS rtti_get_data_element_text_l
+      IMPORTING
+        VALUE(val)    TYPE any
+      RETURNING
+        VALUE(result) TYPE string.
+
     CLASS-METHODS msg_get
       IMPORTING
         VALUE(val)    TYPE any
+      RETURNING
+        VALUE(result) TYPE ty_s_msg.
+
+    CLASS-METHODS msg_get_by_msg
+      IMPORTING
+        id            TYPE any
+        no            TYPE any
+        v1            TYPE any OPTIONAL
+        v2            TYPE any OPTIONAL
+        v3            TYPE any OPTIONAL
+        v4            TYPE any OPTIONAL
       RETURNING
         VALUE(result) TYPE ty_s_msg.
 
@@ -146,6 +163,14 @@ CLASS /ubc/2ui5_cl_util DEFINITION
         it_source     TYPE string_table
       RETURNING
         VALUE(result) TYPE string.
+
+    CLASS-METHODS tab_get_where_by_dfies
+      IMPORTING
+        mv_check_tab_field TYPE string
+        ms_data_row        TYPE REF TO data
+        it_dfies           TYPE /ubc/2ui5_cl_util=>ty_t_dfies
+      RETURNING
+        VALUE(result)      TYPE string.
 
     CLASS-METHODS itab_get_itab_by_csv
       IMPORTING
@@ -231,16 +256,12 @@ CLASS /ubc/2ui5_cl_util DEFINITION
     CLASS-METHODS x_check_raise
       IMPORTING
         v     TYPE clike DEFAULT `CX_SY_SUBRC`
-        !when TYPE xfeld.
+        !when TYPE abap_bool.
 
     CLASS-METHODS x_raise
       IMPORTING
         v TYPE clike DEFAULT `CX_SY_SUBRC`
           PREFERRED PARAMETER v.
-
-    CLASS-METHODS context_get_user_tech
-      RETURNING
-        VALUE(result) TYPE string.
 
     CLASS-METHODS json_stringify
       IMPORTING
@@ -475,7 +496,10 @@ CLASS /ubc/2ui5_cl_util DEFINITION
 ENDCLASS.
 
 
+
 CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
+
+
   METHOD boolean_abap_2_json.
 
     IF boolean_check_by_data( val ).
@@ -486,6 +510,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD boolean_check_by_data.
 
     TRY.
@@ -495,6 +520,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     ENDTRY.
 
   ENDMETHOD.
+
 
   METHOD boolean_check_by_name.
 
@@ -513,6 +539,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD check_bound_a_not_inital.
 
     IF val IS NOT BOUND.
@@ -522,6 +549,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     result = xsdbool( check_unassign_inital( val ) = abap_false ).
 
   ENDMETHOD.
+
 
   METHOD check_unassign_inital.
 
@@ -536,6 +564,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     result = xsdbool( <any> IS INITIAL ).
 
   ENDMETHOD.
+
 
   METHOD conv_copy_ref_data.
 
@@ -554,11 +583,13 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD conv_get_as_data_ref.
 
     GET REFERENCE OF val INTO result.
 
   ENDMETHOD.
+
 
   METHOD c_trim.
 
@@ -571,17 +602,20 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD c_trim_lower.
 
     result = to_lower( c_trim( CONV string( val ) ) ).
 
   ENDMETHOD.
 
+
   METHOD c_trim_upper.
 
     result = to_upper( c_trim( CONV string( val ) ) ).
 
   ENDMETHOD.
+
 
   METHOD filter_itab.
 
@@ -606,6 +640,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD filter_get_multi_by_data.
 
     LOOP AT rtti_get_t_attri_by_any( val ) REFERENCE INTO DATA(lr_comp).
@@ -613,6 +648,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+
 
   METHOD filter_get_range_by_token.
 
@@ -667,6 +703,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD filter_update_tokens.
 
     result = val.
@@ -692,6 +729,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD filter_get_range_t_by_token_t.
 
     LOOP AT val INTO DATA(ls_token).
@@ -699,6 +737,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+
 
   METHOD filter_get_token_range_mapping.
 
@@ -714,6 +753,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
                       (   n = `<leer>` v = `<leer>` ) ).
 
   ENDMETHOD.
+
 
   METHOD filter_get_token_t_by_range_t.
 
@@ -739,6 +779,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD itab_filter_by_val.
 
     FIELD-SYMBOLS <row> TYPE any.
@@ -761,6 +802,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+
 
   METHOD itab_get_csv_by_itab.
 
@@ -794,6 +836,50 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+
+
+  METHOD tab_get_where_by_dfies.
+
+    DATA val TYPE string.
+
+    LOOP AT it_dfies REFERENCE INTO DATA(dfies).
+
+      IF NOT ( dfies->keyflag = abap_true OR dfies->fieldname = mv_check_tab_field ).
+        CONTINUE.
+      ENDIF.
+
+      ASSIGN ms_data_row->* TO FIELD-SYMBOL(<row>).
+
+      ASSIGN COMPONENT dfies->fieldname OF STRUCTURE <row> TO FIELD-SYMBOL(<value>).
+      IF <value> IS NOT ASSIGNED.
+        CONTINUE.
+      ENDIF.
+      IF <value> IS INITIAL.
+        CONTINUE.
+      ENDIF.
+
+      IF result IS NOT INITIAL.
+        DATA(and) = ` AND `.
+      ENDIF.
+
+      IF <value> CA `_`.
+        DATA(escape) = `ESCAPE '#'`.
+      ELSE.
+        CLEAR escape.
+      ENDIF.
+
+      val = <value>.
+
+      IF val CA `_`.
+        REPLACE ALL OCCURRENCES OF `_` IN val WITH `#_`.
+      ENDIF.
+
+      result = |{ result }{ and } ( { dfies->fieldname } LIKE '%{ val }%' { escape } )|.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
 
   METHOD itab_get_itab_by_csv.
 
@@ -840,6 +926,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD json_parse.
     TRY.
 
@@ -850,6 +937,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
         ASSERT x IS NOT BOUND.
     ENDTRY.
   ENDMETHOD.
+
 
   METHOD json_stringify.
     TRY.
@@ -862,6 +950,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
         ASSERT x IS NOT BOUND.
     ENDTRY.
   ENDMETHOD.
+
 
   METHOD rtti_check_class_exists.
 
@@ -878,6 +967,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD rtti_check_ref_data.
 
     TRY.
@@ -889,12 +979,14 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD rtti_check_type_kind_dref.
 
     DATA(lv_type_kind) = cl_abap_datadescr=>get_data_type_kind( val ).
     result = xsdbool( lv_type_kind = cl_abap_typedescr=>typekind_dref ).
 
   ENDMETHOD.
+
 
   METHOD rtti_get_classname_by_ref.
 
@@ -903,6 +995,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
                               sub = `\CLASS=` ).
 
   ENDMETHOD.
+
 
   METHOD rtti_get_intfname_by_ref.
 
@@ -914,11 +1007,13 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD rtti_get_type_kind.
 
     result = cl_abap_datadescr=>get_data_type_kind( val ).
 
   ENDMETHOD.
+
 
   METHOD rtti_get_type_name.
     TRY.
@@ -931,9 +1026,14 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     ENDTRY.
   ENDMETHOD.
 
+
   METHOD rtti_get_t_attri_by_include.
 
-    DATA(sdescr) = CAST cl_abap_structdescr( cl_abap_typedescr=>describe_by_name( type->absolute_name ) ).
+    cl_abap_typedescr=>describe_by_name( EXPORTING  p_name         = type->absolute_name
+                                         RECEIVING  p_descr_ref    = DATA(type_desc)
+                                         EXCEPTIONS type_not_found = 1 ).
+
+    DATA(sdescr) = CAST cl_abap_structdescr( type_desc ).
     DATA(comps) = sdescr->get_components( ).
 
     LOOP AT comps REFERENCE INTO DATA(lr_comp).
@@ -958,12 +1058,14 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD rtti_get_t_attri_by_oref.
 
     DATA(lo_obj_ref) = cl_abap_objectdescr=>describe_by_object_ref( val ).
     result = CAST cl_abap_classdescr( lo_obj_ref )->attributes.
 
   ENDMETHOD.
+
 
   METHOD rtti_get_t_attri_by_any.
 
@@ -979,24 +1081,30 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
                 DATA(lo_ref) = cl_abap_typedescr=>describe_by_data_ref( val ).
                 lo_struct = CAST cl_abap_structdescr( lo_ref ).
               CATCH cx_root.
-                lo_tab = CAST cl_abap_tabledescr( lo_ref ).
-                lo_struct = CAST cl_abap_structdescr( lo_tab->get_table_line_type( ) ).
+                TRY.
+                    lo_tab = CAST cl_abap_tabledescr( lo_ref ).
+                    lo_struct = CAST cl_abap_structdescr( lo_tab->get_table_line_type( ) ).
+                  CATCH cx_root.
+                    lo_struct ?= cl_abap_structdescr=>describe_by_name( val ).
+                ENDTRY.
             ENDTRY.
         ENDTRY.
     ENDTRY.
 
-    result = lo_struct->get_components( ).
+    DATA(comps) = lo_struct->get_components( ).
 
-    LOOP AT result REFERENCE INTO DATA(lr_comp)
-         WHERE as_include = abap_true.
+    LOOP AT comps REFERENCE INTO DATA(lr_comp).
 
-      DATA(lt_attri) = rtti_get_t_attri_by_include( lr_comp->type ).
-
-      DELETE result.
-      INSERT LINES OF lt_attri INTO TABLE result.
+      IF lr_comp->as_include = abap_false.
+        APPEND lr_comp->* TO result.
+      ELSE.
+        DATA(lt_attri) = rtti_get_t_attri_by_include( lr_comp->type ).
+        APPEND LINES OF lt_attri TO result.
+      ENDIF.
     ENDLOOP.
 
   ENDMETHOD.
+
 
   METHOD rtti_get_t_ddic_fixed_values.
 
@@ -1024,6 +1132,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD rtti_tab_get_relative_name.
 
     FIELD-SYMBOLS <table> TYPE any.
@@ -1050,6 +1159,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD source_get_file_types.
 
     DATA(lv_types) = |abap, abc, actionscript, ada, apache_conf, applescript, asciidoc, assembly_x86, autohotkey, batchfile, bro, c9search, c_cpp, cirru, clojure, cobol, coffee, coldfusion, csharp, css, curly, d, dart, diff, django, dockerfile, | &&
@@ -1063,6 +1173,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD source_get_method2.
 
     DATA(lt_source) = source_get_method( iv_classname  = iv_classname
@@ -1071,6 +1182,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     result = source_method_to_file( lt_source ).
 
   ENDMETHOD.
+
 
   METHOD source_method_to_file.
 
@@ -1082,6 +1194,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+
 
   METHOD filter_get_sql_by_sql_string.
 
@@ -1095,25 +1208,30 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD time_get_date_by_stampl.
     " TODO: variable is assigned but never used (ABAP cleaner)
     CONVERT TIME STAMP val TIME ZONE sy-zonlo INTO DATE result TIME DATA(lv_dummy).
   ENDMETHOD.
 
+
   METHOD time_get_timestampl.
     GET TIME STAMP FIELD result.
   ENDMETHOD.
+
 
   METHOD time_get_time_by_stampl.
     " TODO: variable is assigned but never used (ABAP cleaner)
     CONVERT TIME STAMP val TIME ZONE sy-zonlo INTO DATE DATA(lv_dummy) TIME result.
   ENDMETHOD.
 
+
   METHOD time_substract_seconds.
 
     result = cl_abap_tstmp=>subtractsecs( tstmp = time
                                           secs  = seconds ).
   ENDMETHOD.
+
 
   METHOD unassign_data.
 
@@ -1124,6 +1242,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD unassign_object.
 
     FIELD-SYMBOLS <unassign> TYPE any.
@@ -1132,6 +1251,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     result = <unassign>.
 
   ENDMETHOD.
+
 
   METHOD url_param_create_url.
 
@@ -1143,6 +1263,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD url_param_get.
 
     DATA(lt_params) = url_param_get_tab( url ).
@@ -1150,6 +1271,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     result = VALUE #( lt_params[ n = lv_val ]-v OPTIONAL ).
 
   ENDMETHOD.
+
 
   METHOD url_param_get_tab.
 
@@ -1189,6 +1311,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD url_param_set.
 
     DATA(lt_params) = url_param_get_tab( url ).
@@ -1207,17 +1330,20 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD context_get_user_tech.
-    result = sy-uname.
-  ENDMETHOD.
 
   METHOD xml_parse.
+
+    IF xml IS INITIAL.
+      CLEAR any.
+      RETURN.
+    ENDIF.
 
     CALL TRANSFORMATION id
          SOURCE XML xml
          RESULT data = any.
 
   ENDMETHOD.
+
 
   METHOD xml_srtti_parse.
 
@@ -1237,6 +1363,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     CALL TRANSFORMATION id SOURCE XML rtti_data RESULT dobj = <variable>.
 
   ENDMETHOD.
+
 
   METHOD xml_srtti_stringify.
 
@@ -1276,6 +1403,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD xml_stringify.
 
     CALL TRANSFORMATION id
@@ -1284,6 +1412,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
          OPTIONS data_refs = `heap-or-create`.
 
   ENDMETHOD.
+
 
   METHOD x_check_raise.
 
@@ -1294,6 +1423,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+
 
   METHOD x_get_last_t100.
 
@@ -1311,6 +1441,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
     result = x->get_text( ).
 
   ENDMETHOD.
+
 
   METHOD x_raise.
 
@@ -1378,6 +1509,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD itab_corresponding.
 
     FIELD-SYMBOLS <row_in>  TYPE any.
@@ -1398,30 +1530,75 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD itab_filter_by_t_range.
 
   ENDMETHOD.
+
 
   METHOD filter_get_data_by_multi.
 
   ENDMETHOD.
 
+
   METHOD filter_get_sql_where.
 
-    LOOP AT val INTO DATA(ls_filter).
 
-      DATA(lo_range) = NEW /ubc/2ui5_cl_util_range( iv_fieldname = ls_filter-name
-                        ir_range     = REF #( ls_filter-t_range ) ).
+    IF context_check_abap_cloud( ).
 
-    ENDLOOP.
+
+    ELSE.
+
+      TYPES: BEGIN OF ty_rscedst,
+               fnam   TYPE c LENGTH 30, " Field Name
+               sign   TYPE c LENGTH 1,  " Selection criteria: SIGN
+               option TYPE c LENGTH 2,  " Selection criteria: OPTION
+               low    TYPE c LENGTH 45, " From value
+               high   TYPE c LENGTH 45, " To value
+             END OF ty_rscedst.
+
+      DATA lt_range TYPE STANDARD TABLE OF ty_rscedst.
+
+      LOOP AT val INTO DATA(ls_filter).
+        LOOP AT ls_filter-t_range INTO DATA(ls_range).
+
+          INSERT VALUE #(
+              fnam = ls_filter-name
+              sign = ls_range-sign
+              option = ls_range-option
+              low = ls_range-low
+              high = ls_range-high
+           ) INTO TABLE lt_range.
+
+        ENDLOOP.
+      ENDLOOP.
+
+*      DATA result TYPE string.
+*    DATA lt_where TYPE rsdmd_t_where.
+      DATA(lv_fm) = 'RSDS_RANGE_TO_WHERE'.
+      CALL FUNCTION lv_fm
+        EXPORTING
+          i_t_range      = lt_range
+*         i_th_range     =
+*         i_r_renderer   =
+        IMPORTING
+          e_where        = result
+*         e_t_where      = lt_where
+        EXCEPTIONS
+          internal_error = 1
+          OTHERS         = 2.
+
+    ENDIF.
 
   ENDMETHOD.
+
 
   METHOD msg_get_t.
 
     result = /ubc/2ui5_cl_util_msg=>msg_get( val ).
 
   ENDMETHOD.
+
 
   METHOD rtti_check_clike.
 
@@ -1436,6 +1613,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD ui5_get_msg_type.
 
     result = SWITCH #( val
@@ -1446,6 +1624,7 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD rtti_create_tab_by_name.
 
     DATA(struct_desc) = cl_abap_structdescr=>describe_by_name( val ).
@@ -1455,11 +1634,32 @@ CLASS /ubc/2ui5_cl_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD msg_get.
 
     DATA(lt_msg) = msg_get_t( val ).
-    result = lt_msg[ 0 ].
+    result = lt_msg[ 1 ].
 
   ENDMETHOD.
 
+
+  METHOD rtti_get_data_element_text_l.
+
+    result = /ubc/2ui5_cl_util=>rtti_get_data_element_texts( val )-long.
+
+  ENDMETHOD.
+
+
+  METHOD msg_get_by_msg.
+
+    DATA(ls_msg) = VALUE /ubc/2ui5_cl_util=>ty_s_msg(
+      id         = id
+      no         = no
+      v1         = v1
+      v2         = v2
+      v3         = v3
+      v4         = v4 ).
+    result = msg_get( ls_msg ).
+
+  ENDMETHOD.
 ENDCLASS.
