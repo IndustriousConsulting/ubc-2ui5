@@ -21,6 +21,7 @@ INTERFACE /ubc/2ui5_if_client
       history_back              TYPE string VALUE `HISTORY_BACK`,
       clipboard_app_state       TYPE string VALUE `CLIPBOARD_APP_STATE`,
       clipboard_copy            TYPE string VALUE `CLIPBOARD_COPY`,
+      store_data                TYPE string VALUE `STORE_DATA`,
     END OF cs_event.
 
   CONSTANTS:
@@ -36,7 +37,7 @@ INTERFACE /ubc/2ui5_if_client
 
   METHODS view_display
     IMPORTING
-      val                           TYPE clike
+      val                           TYPE any
       switch_default_model_anno_uri TYPE string OPTIONAL
       switch_default_model_path     TYPE string OPTIONAL.
 
@@ -188,7 +189,7 @@ INTERFACE /ubc/2ui5_if_client
     IMPORTING
       val                  TYPE data
       !path                TYPE abap_bool                     DEFAULT abap_false
-      view                 TYPE string                        DEFAULT /ubc/2ui5_if_client=>cs_view-main
+      view                 TYPE string                        DEFAULT cs_view-main
       custom_mapper        TYPE REF TO /ubc/2ui5_if_ajson_mapping OPTIONAL
       custom_mapper_back   TYPE REF TO /ubc/2ui5_if_ajson_mapping OPTIONAL
       custom_filter        TYPE REF TO /ubc/2ui5_if_ajson_filter  OPTIONAL
